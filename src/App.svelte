@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/tauri'
 
-  invoke('hello', {name: 'world'})
+  invoke('test_play_')
 		.then((msg) => {
       console.log()
 		})
