@@ -53,9 +53,9 @@
     },
     "windows": [
       {
-        "title": "audiobookmanager",
+        "title": "AudiobookManager",
         "width": 800,
-        "height": 600,
+        "height": 450,
         "resizable": true,
         "fullscreen": false
       }
