@@ -11,12 +11,12 @@
 
   let info = {};
   invoke('get_audio_list', {path: dir})
-  .then((l) => Object.values(l).forEach(item => info[item[0]] = item[1]));
+  .then((_info) => info = _info);
 
   const record = (e) => {
     const target = e.target;
-    console.log(target.currentTime);
-    console.log(decodeURI(target.src.split('/').pop()));
+    info[decodeURI(target.src.split('/').pop())] = target.currentTime
+    invoke('record_audio_list', {'info': info});
   };
 
   const set_current_time = (e) => {
@@ -29,7 +29,7 @@
 <main>
   <div class="uk-container uk-container-xsmall">
     <ul class="uk-list uk-list-divider">
-      {#each Object.entries(info) as [name, time]}
+      {#each Object.entries(info) as [name, _]}
         <li>
           <audio class="tmp" controls src={convertFileSrc(dir)+name} on:loadeddata="{set_current_time}" on:pause={record}/>
           {name}
