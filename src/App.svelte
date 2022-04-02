@@ -1,5 +1,6 @@
 <script lang="ts">
   import { invoke, convertFileSrc } from '@tauri-apps/api/tauri'
+  import { appWindow } from '@tauri-apps/api/window'
   import { dialog } from '@tauri-apps/api'
 	import UIkit from 'uikit'
 	import Icons from 'uikit/dist/js/uikit-icons'
@@ -30,7 +31,7 @@
 
   const record = (e) => {
     const target = e.target;
-    info[decodeURI(target.src.split('/').pop())] = target.currentTime
+    info[decodeURI(target.src.split('/').pop())] = target.currentTime;
     invoke('record_audio_list', {'info': info});
   };
 
@@ -39,6 +40,14 @@
     const time = info[decodeURI(target.src.split('/').pop())]
     target.currentTime = time;
   };
+
+  appWindow.listen('tauri://close-requested', ({ event, payload }) => {
+    const audios = document.getElementsByTagName('audio');
+    Array.from(audios).forEach(item => info[decodeURI(item.src.split('/').pop())] = item.currentTime);
+
+    invoke('record_audio_list', {'info': info})
+    .then(()=>appWindow.close());
+  });
 </script>
 
 <main>
@@ -48,7 +57,7 @@
     <ul class="uk-list uk-list-divider">
       {#each Object.entries(info) as [name, _]}
         <li>
-          <audio class="tmp" controls src={convertFileSrc(dir)+name} on:loadeddata="{set_current_time}" on:pause={record}/>
+          <audio controls src={convertFileSrc(dir)+name} on:loadeddata="{set_current_time}" on:pause={record}/>
           {name}
         </li>
       {/each}
