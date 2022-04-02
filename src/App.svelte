@@ -1,5 +1,6 @@
 <script lang="ts">
   import { invoke, convertFileSrc } from '@tauri-apps/api/tauri'
+  import { dialog } from '@tauri-apps/api'
 	import UIkit from 'uikit'
 	import Icons from 'uikit/dist/js/uikit-icons'
 	import 'uikit/dist/css/uikit.css'
@@ -7,11 +8,25 @@
 
 	UIkit.use(Icons);
 
-  const dir = 'F:/kindletext/audio/';
+  let dir = 'not_exist_folder';
+  invoke('get_dir')
+  .then((d) => {
+    dir = d;
+    get_audio_list(dir);
+  })
+  .catch((_) => change_folder());
 
   let info = {};
-  invoke('get_audio_list', {path: dir})
-  .then((_info) => info = _info);
+  const get_audio_list = (path) => invoke('get_audio_list', {path: dir}).then((_info) => info = _info);
+
+  const change_folder = () => {
+    dialog.open({directory: true, multiple: false, recursive: false})
+    .then((selected_dir) => {
+      dir = selected_dir.replaceAll('\\', '/') + '/';
+      invoke('set_dir', {dir: dir});
+      get_audio_list(dir);
+    });
+  };
 
   const record = (e) => {
     const target = e.target;
@@ -28,6 +43,8 @@
 
 <main>
   <div class="uk-container uk-container-xsmall">
+    {dir}<button id="change_dir" class="uk-button uk-button-default uk-button-small" on:click={change_folder}>change</button>
+
     <ul class="uk-list uk-list-divider">
       {#each Object.entries(info) as [name, _]}
         <li>
@@ -40,4 +57,7 @@
 </main>
 
 <style lang="scss">
+  #change_dir {
+    margin-left: 1rem;
+  }
 </style>
