@@ -51,7 +51,7 @@
 </script>
 
 <main>
-  <div class="uk-container uk-container-xsmall">
+  <div class="uk-container uk-container-xlarge">
     {dir}<button id="change_dir" class="uk-button uk-button-default uk-button-small" on:click={change_folder}>change</button>
 
     <ul class="uk-list uk-list-divider">

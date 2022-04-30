@@ -33,21 +33,15 @@ fn set_dir(dir: String) {
 
 #[tauri::command]
 fn get_audio_list(path: &Path) -> Result<HashMap<String, f32>, String> {
-    let titles: Vec<(String, f32)>;
-    match fs::read_dir(path) {
-        Ok(dir) => {
-            titles = dir.filter_map(|entry| {
-                let entry = entry.ok()?;
-                if entry.file_type().ok()?.is_file() {
-                    Some((entry.file_name().to_string_lossy().into_owned(), 0.0))
-                } else {
-                    None
-                }
-            })
-            .collect();
-        },
-        Err(_) => return Err("cannot find folder.".to_string()),
-    }
+    let titles: Vec<(String, f32)> = if let Ok(dir) = fs::read_dir(path) {
+        dir.filter_map(|entry| {
+            let entry = entry.ok()?;
+            entry.file_type().ok()?.is_file().then(|| (entry.file_name().to_string_lossy().into_owned(), 0.0))
+        })
+        .collect()
+    } else {
+        return Err("cannot find folder.".to_string())
+    };
 
     let mut info: HashMap<String, f32> = titles.into_iter().collect();
 
