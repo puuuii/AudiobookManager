@@ -10,15 +10,17 @@
 	class OneSoundInfo {
 		time: number;
 		volume: number;
+		muted: boolean;
 
-		constructor(time: number = 0.0, volume: number = 1.0) {
+		constructor(time: number = 0.0, volume: number = 1.0, muted: boolean = false) {
 			this.time = time;
 			this.volume = volume;
+			this.muted = muted;
 		}
 	}
 
 	// 選択ディレクトリ取得
-	$:dir = "change dir";
+	$:dir = "select directory";
 	const get_dir = () => {
     dialog.open({directory: true, multiple: false, recursive: false})
 			.then((d: string) => {
@@ -56,15 +58,17 @@
 
 	// audioコントロールに時間設定
 	const set_info = (e) => {
-		e.target.currentTime = info[e.target.id].time
-		e.target.volume = info[e.target.id].volume
+		const target = info[e.target.id]
+		e.target.currentTime = target.time
+		e.target.volume = target.volume
+		e.target.muted = target.muted
 	}
 
 	// 音声情報保存（別ディレクトリ情報は残す）
 	const record_info = (e) => {
 		let info_ = {}
 		Array.from(document.getElementsByTagName('audio')).forEach(audio => {
-			info_[audio.id] = new OneSoundInfo(audio.currentTime, audio.volume)
+			info_[audio.id] = new OneSoundInfo(audio.currentTime, audio.volume, audio.muted);
 		});
 
 		// 既存の音声情報に新規情報を上書き
@@ -77,7 +81,8 @@
 
 	onMount(() => {
 		// 音声ファイル場所情報取得
-		dir = localStorage.getItem(KEY_DIR);
+		let _dir = localStorage.getItem(KEY_DIR);
+		if (_dir) { dir = _dir }
 
 		// 音声情報作成
 		make_info();
